@@ -565,7 +565,7 @@ static unsigned char fontdata8x8[] =
 	0x00,0x00,0x76,0xDC,0x00,0x00,0x00,0x00,0x10,0x28,0x10,0x54,0xAA,0x44,0x00,0x00,
 };
 
-static void gp2x_text(unsigned short *screen, int x, int y, char *text, int color)
+static void gp2x_text_(unsigned short *screen, int x, int y, char *text, int color)
 {
 	unsigned int i,l;
 	screen=screen+(x*2)+(y*2)*640;
@@ -624,6 +624,78 @@ static void gp2x_text(unsigned short *screen, int x, int y, char *text, int colo
 		}
 		screen+=16;
 	} 
+}
+
+static void gp2x_text_rol(unsigned short *screen, int x, int y, char *text, int color)
+{
+	unsigned int i,l;
+    screen = screen + 640*(480-1) + y*2 - x*2*640;
+    int sl = options.display_effect != 1; // scanlines
+
+	for (i=0;i<strlen(text);i++) {
+		
+		for (l=0;l<16;l=l+2) {
+			screen[l-0*640]=(fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l-0*640];
+			screen[l-1*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l-1*640];
+
+			screen[l-2*640]=(fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l-2*640];
+			screen[l-3*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l-3*640];
+
+			screen[l-4*640]=(fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l-4*640];
+			screen[l-5*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l-5*640];
+
+			screen[l-6*640]=(fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l-6*640];
+			screen[l-7*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l-7*640];
+
+			screen[l-8*640]=(fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l-8*640];
+			screen[l-9*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l-9*640];
+
+			screen[l-10*640]=(fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l-10*640];
+			screen[l-11*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l-11*640];
+
+			screen[l-12*640]=(fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l-12*640];
+			screen[l-13*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l-13*640];
+
+			screen[l-14*640]=(fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l-14*640];
+			screen[l-15*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l-15*640];
+		}
+		for (l=1;l<16;l=l+2) {
+			screen[l-0*640]=(fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l-0*640];
+			screen[l-1*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l-1*640];
+
+			screen[l-2*640]=(fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l-2*640];
+			screen[l-3*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l-3*640];
+
+			screen[l-4*640]=(fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l-4*640];
+			screen[l-5*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l-5*640];
+
+			screen[l-6*640]=(fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l-6*640];
+			screen[l-7*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l-7*640];
+
+			screen[l-8*640]=(fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l-8*640];
+			screen[l-9*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l-9*640];
+
+			screen[l-10*640]=(fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l-10*640];
+			screen[l-11*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l-11*640];
+
+			screen[l-12*640]=(fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l-12*640];
+			screen[l-13*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l-13*640];
+
+			screen[l-14*640]=(fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l-14*640];
+			screen[l-15*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l-15*640];
+		}
+		screen-=16*640;
+	} 
+}
+
+static void gp2x_text(unsigned short *screen, int x, int y, char *text, int color)
+{
+    if (options.rol) {
+        gp2x_text_rol(screen, x, y, text, color);
+    }
+    else {
+        gp2x_text_(screen, x, y, text, color);
+    }
 }
 
 void gp2x_gamelist_text_out(int x, int y, char *eltexto, int color)
