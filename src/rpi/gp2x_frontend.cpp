@@ -28,7 +28,7 @@ int gp2x_ramtweaks=1;
 int gp2x_cheat=0;
 
 static unsigned short *gp2xmenu_bmp;
-static unsigned short *gp2xsplash_bmp;
+//static unsigned short *gp2xsplash_bmp;
 
 #define MAXFAVS 1000
 static char favarray[MAXFAVS][9];
@@ -84,25 +84,25 @@ static void gp2x_intro_screen(int first_run) {
 
 	sprintf(name,"skins/rpisplash16.bmp");
 
-	f=fopen(name,"rb");
-	if (f) {
-		//Read header to find where to skip to for bitmap
-        fread(&h, sizeof(BITMAPFILEHEADER), 1, f); //reading the FILEHEADER
-		fseek(f, h.bfOffBits, SEEK_SET);
+	// f=fopen(name,"rb");
+	// if (f) {
+	// 	//Read header to find where to skip to for bitmap
+    //     fread(&h, sizeof(BITMAPFILEHEADER), 1, f); //reading the FILEHEADER
+	// 	fseek(f, h.bfOffBits, SEEK_SET);
 
-		fread(gp2xsplash_bmp,1,1000000,f);
-		fclose(f);
-	} 	
-	else {
-		printf("\nERROR: Splash screen missing from skins directory\n");
-		gp2x_exit();
-	}
+	// 	fread(gp2xsplash_bmp,1,1000000,f);
+	// 	fclose(f);
+	// } 	
+	// else {
+	// 	printf("\nERROR: Splash screen missing from skins directory\n");
+	// 	gp2x_exit();
+	// }
 
-	if(first_run) {
-		load_bmp_16bpp(gp2x_screen15,gp2xsplash_bmp);
-		FE_DisplayScreen();
-		sleep(1);
-	}
+	// if(first_run) {
+	// 	load_bmp_16bpp(gp2x_screen15,gp2xsplash_bmp);
+	// 	FE_DisplayScreen();
+	// 	sleep(1);
+	// }
 	
 	sprintf(name,"skins/rpimenu16.bmp");
 	f=fopen(name,"rb");
@@ -558,7 +558,7 @@ void frontend_gui (char *gamename, int first_run)
 	gp2x_frontend_init();
 
 	gp2xmenu_bmp = (unsigned short*)calloc(1, 1000000);
-	gp2xsplash_bmp = (unsigned short*)calloc(1, 1000000);
+	//gp2xsplash_bmp = (unsigned short*)calloc(1, 1000000);
 
 	/* Show load bitmaps and show intro screen */
     gp2x_intro_screen(first_run);
@@ -625,6 +625,6 @@ void frontend_gui (char *gamename, int first_run)
     gp2x_frontend_deinit();
 
 	free(gp2xmenu_bmp);
-	free(gp2xsplash_bmp);
+	//free(gp2xsplash_bmp);
 	
 }
