@@ -97,6 +97,31 @@ int fuzzycmp (const char *s, const char *l)
 	return gaps;
 }
 
+const char* AUTORUN_FILENAME = "autorun.txt";
+
+int prev_game_to_autorun() {
+    //XXX sloppy paths: working dir?
+    // if cache file exists, load game index & run directly   
+    int game_index = -1; 
+    FILE* f = fopen(AUTORUN_FILENAME,"r");
+	if (f) {
+        fscanf(f, "%d", &game_index); // OK to fail on initial empty file.
+        fclose(f);
+    }
+    return game_index;
+}
+
+void set_next_game_to_autorun(int game_index) {
+    //XXX sloppy paths: working dir?
+    // if cache file exists, update it with game index.
+    FILE* f = fopen(AUTORUN_FILENAME,"r");
+	if (f) {
+        fclose(f);
+        f = fopen(AUTORUN_FILENAME, "w");
+        fprintf(f, "%d", game_index);
+        fclose(f);
+    }
+}
 
 int main (int argc, char **argv)
 {
@@ -187,10 +212,13 @@ int main (int argc, char **argv)
     if(init_SDL()==0) {
         exit(1);
     };
+
+    game_index = prev_game_to_autorun();
+    int autorun_previous = game_index > -1;
     
 gui_loop:
     
-    if(use_gui) {
+    if(use_gui && !autorun_previous) {
 		usleep(1000000/2);
         
         gp2x_joystick_clear();
@@ -412,6 +440,11 @@ gui_loop:
     /* go for it */
     printf ("%s (%s)...\n",drivers[game_index]->description,drivers[game_index]->name);
     res = run_game (game_index);
+
+    if (!res) {
+        set_next_game_to_autorun(game_index);
+        autorun_previous = 0; // Use GUI from now on.
+    }
 
 	/* close open files */
 	if (errorlog) fclose (errorlog);
