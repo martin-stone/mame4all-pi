@@ -29,6 +29,7 @@ int gp2x_cheat=0;
 
 static unsigned short *gp2xmenu_bmp;
 //static unsigned short *gp2xsplash_bmp;
+static int gamelist_spacing = 0;
 
 #define MAXFAVS 1000
 static char favarray[MAXFAVS][9];
@@ -355,7 +356,7 @@ static void game_list_view(int *pos) {
 						gp2x_gamelist_text_out( screen_x, screen_y, fe_drivers[i].description, gp2x_color15(255,255,255));
 				}
 				
-				screen_y+=8;
+				screen_y += 8 + gamelist_spacing;
 			}
 			aux_pos++;
 		}
@@ -604,6 +605,8 @@ void frontend_gui (char *gamename, int first_run)
     //Read joystick axis to use, default to 0 & 1
     joyaxis_LR = get_int("frontend", "AXIS_LR", NULL, 0);
     joyaxis_UD = get_int("frontend", "AXIS_UD", NULL, 1);
+
+    gamelist_spacing = get_int("frontend", "gamelist_spacing", NULL, 0);
 
 	close_config_file();
 
