@@ -30,6 +30,7 @@ int gp2x_cheat=0;
 static unsigned short *gp2xmenu_bmp;
 //static unsigned short *gp2xsplash_bmp;
 static int gamelist_spacing = 0;
+static int tidy_names = 0;
 
 #define MAXFAVS 1000
 static char favarray[MAXFAVS][9];
@@ -49,6 +50,7 @@ static void gp2x_exit(void);
 
 void open_config_file(void);
 void close_config_file(void);
+int get_bool (char *section, char *option, char *shortcut, int def);
 int get_int (char *section, char *option, char *shortcut, int def);
 int is_joy_button_pressed (int button, int ExKey);
 
@@ -296,6 +298,12 @@ static void game_list_init(int argc)
 		game_list_init_cache();
 }
 
+static void clean_desc(char* dst, const char* src) {
+    strncpy(dst, src, 127);
+    const char* end_pos = tidy_names ? strchr(src, '(') : NULL;
+    if (end_pos) dst[end_pos - src] = 0;
+}
+
 static void game_list_view(int *pos) {
 
 	int i;
@@ -341,19 +349,22 @@ static void game_list_view(int *pos) {
                     counter++;
                 }
 
+                char description[128];
+                clean_desc(description, fe_drivers[i].description);
+                
 				if (aux_pos==*pos) {
 					if(foundfav) 
-						gp2x_gamelist_text_out( screen_x, screen_y, fe_drivers[i].description, gp2x_color15(50,255,50));
+						gp2x_gamelist_text_out( screen_x, screen_y, description, gp2x_color15(50,255,50));
 					else
-						gp2x_gamelist_text_out( screen_x, screen_y, fe_drivers[i].description, gp2x_color15(0,150,255));
+						gp2x_gamelist_text_out( screen_x, screen_y, description, gp2x_color15(0,150,255));
 					gp2x_gamelist_text_out( screen_x-10, screen_y,">",gp2x_color15(255,255,255) );
 					gp2x_gamelist_text_out( screen_x-13, screen_y-1,"-",gp2x_color15(255,255,255) );
 				}
 				else {
 					if(foundfav) 
-						gp2x_gamelist_text_out( screen_x, screen_y, fe_drivers[i].description, gp2x_color15(50,255,50));
+						gp2x_gamelist_text_out( screen_x, screen_y, description, gp2x_color15(50,255,50));
 					else
-						gp2x_gamelist_text_out( screen_x, screen_y, fe_drivers[i].description, gp2x_color15(255,255,255));
+						gp2x_gamelist_text_out( screen_x, screen_y, description, gp2x_color15(255,255,255));
 				}
 				
 				screen_y += 8 + gamelist_spacing;
@@ -607,6 +618,7 @@ void frontend_gui (char *gamename, int first_run)
     joyaxis_UD = get_int("frontend", "AXIS_UD", NULL, 1);
 
     gamelist_spacing = get_int("frontend", "gamelist_spacing", NULL, 0);
+    tidy_names = get_bool("frontend", "tidy_names", NULL, 0);
 
 	close_config_file();
 

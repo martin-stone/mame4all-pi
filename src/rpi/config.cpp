@@ -106,7 +106,7 @@ void close_config_file(void)
  * 0 = false, >0 = true, <0 = auto
  * the shortcut can only be used on the commandline
  */
-static int get_bool (char *section, char *option, char *shortcut, int def)
+int get_bool (char *section, char *option, char *shortcut, int def)
 {
 	GError *error=NULL;
 	char *yesnoauto;
