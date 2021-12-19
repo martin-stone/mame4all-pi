@@ -8,6 +8,7 @@
 #include "gp2x_frontend_list.h"
 #include <SDL.h>
 #include "allegro.h"
+#include "mame.h"
 
 int game_num_avail=0;
 static int last_game_selected=0;
@@ -56,12 +57,18 @@ int is_joy_button_pressed (int button, int ExKey);
 
 static void load_bmp_16bpp(unsigned short *out, unsigned short *in)
 {
- 	int y;
+	int y;
 
+	int scanlines = options.display_effect == 1;
 	//Load bitmap, file will be flipped y so invert
 	in+=(640*480)-1;
- 	for (y=479;y!=-1;y--) {
-		memcpy(out, in, 640*2);
+	for (y=479;y!=-1;y--) {
+		if (scanlines && y%2) {
+			memset(out, 0, 640*2);
+		}
+		else {
+			memcpy(out, in, 640*2);
+		}
 		out+=640;
 		in-=640;
 	}
