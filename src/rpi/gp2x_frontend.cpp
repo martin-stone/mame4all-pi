@@ -32,6 +32,7 @@ static unsigned short *gp2xmenu_bmp;
 //static unsigned short *gp2xsplash_bmp;
 static int gamelist_spacing = 0;
 static int tidy_names = 0;
+static int enable_favorites = 1;
 
 #define MAXFAVS 1000
 static char favarray[MAXFAVS][9];
@@ -537,7 +538,7 @@ static void select_game(char *emu, char *game)
 			break;
 		}
 
-		if (is_joy_button_pressed(pi_joy[SELECT_1], ExKey1) || osd_is_sdlkey_pressed(pi_key[SELECT_1]) )
+		if (enable_favorites && (is_joy_button_pressed(pi_joy[SELECT_1], ExKey1) || osd_is_sdlkey_pressed(pi_key[SELECT_1])) )
 		{
            //Check if the game is already a favorite
             game_list_select(last_game_selected, game, emu);
@@ -626,6 +627,7 @@ void frontend_gui (char *gamename, int first_run)
 
     gamelist_spacing = get_int("frontend", "gamelist_spacing", NULL, 0);
     tidy_names = get_bool("frontend", "tidy_names", NULL, 0);
+    enable_favorites = get_bool("frontend", "enable_favorites", NULL, 1);
 
 	close_config_file();
 
