@@ -565,136 +565,65 @@ static unsigned char fontdata8x8[] =
 	0x00,0x00,0x76,0xDC,0x00,0x00,0x00,0x00,0x10,0x28,0x10,0x54,0xAA,0x44,0x00,0x00,
 };
 
-static void gp2x_text_(unsigned short *screen, int x, int y, char *text, int color)
-{
-	unsigned int i,l;
-	screen=screen+(x*2)+(y*2)*640;
-
-	for (i=0;i<strlen(text);i++) {
-		
-		for (l=0;l<16;l=l+2) {
-			screen[l*640+0]=(fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l*640+0];
-			screen[l*640+1]=(fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l*640+1];
-
-			screen[l*640+2]=(fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l*640+2];
-			screen[l*640+3]=(fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l*640+3];
-
-			screen[l*640+4]=(fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l*640+4];
-			screen[l*640+5]=(fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l*640+5];
-
-			screen[l*640+6]=(fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l*640+6];
-			screen[l*640+7]=(fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l*640+7];
-
-			screen[l*640+8]=(fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l*640+8];
-			screen[l*640+9]=(fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l*640+9];
-
-			screen[l*640+10]=(fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l*640+10];
-			screen[l*640+11]=(fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l*640+11];
-
-			screen[l*640+12]=(fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l*640+12];
-			screen[l*640+13]=(fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l*640+13];
-
-			screen[l*640+14]=(fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l*640+14];
-			screen[l*640+15]=(fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l*640+15];
-		}
-		for (l=1;l<16;l=l+2) {
-			screen[l*640+0]=(fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l*640+0];
-			screen[l*640+1]=(fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l*640+1];
-
-			screen[l*640+2]=(fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l*640+2];
-			screen[l*640+3]=(fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l*640+3];
-
-			screen[l*640+4]=(fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l*640+4];
-			screen[l*640+5]=(fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l*640+5];
-
-			screen[l*640+6]=(fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l*640+6];
-			screen[l*640+7]=(fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l*640+7];
-
-			screen[l*640+8]=(fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l*640+8];
-			screen[l*640+9]=(fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l*640+9];
-
-			screen[l*640+10]=(fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l*640+10];
-			screen[l*640+11]=(fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l*640+11];
-
-			screen[l*640+12]=(fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l*640+12];
-			screen[l*640+13]=(fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l*640+13];
-
-			screen[l*640+14]=(fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l*640+14];
-			screen[l*640+15]=(fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l*640+15];
-		}
-		screen+=16;
-	} 
+inline unsigned int pixel_offset(int x, int y, const int* matrix) {
+    const int screen_w_px = 640;    
+    return (
+        (x*matrix[0] + y*matrix[1]) 
+        + (x*matrix[2] + y*matrix[3])*screen_w_px
+    );
 }
 
-static void gp2x_text_rol(unsigned short *screen, int x, int y, char *text, int color)
-{
-	unsigned int i,l;
-    screen = screen + 640*(480-1) + y*2 - x*2*640;
-    int sl = options.display_effect != 1; // scanlines
 
-	for (i=0;i<strlen(text);i++) {
-		
-		for (l=0;l<16;l=l+2) {
-			screen[l-0*640]=(fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l-0*640];
-			screen[l-1*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l-1*640];
+static void gp2x_text_rot(unsigned short *screen_top_left, int x, int y, const char *text, int color, const int* matrix) {
+    const int dot_size = 2; //pixels per dot side
+    const int glyph_size = 8;
+    // scanlines
+    const int xskip = options.display_effect == 1 && !matrix[0] ? 2 : 1;
+    const int yskip = options.display_effect == 1 && matrix[0] ? 2 : 1;
 
-			screen[l-2*640]=(fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l-2*640];
-			screen[l-3*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l-3*640];
+    unsigned short* pixel_addr = screen_top_left + pixel_offset(x*dot_size, y*dot_size, matrix);
 
-			screen[l-4*640]=(fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l-4*640];
-			screen[l-5*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l-5*640];
+    while (*text) {
+        for (int gy=0; gy<glyph_size; ++gy) {
+            const unsigned char glyph_line = fontdata8x8[*text * glyph_size + gy];
+            for (int gx=0; gx<glyph_size; ++gx) {
+                int glyph_bit = glyph_line & 0x80 >> gx;
+                if (glyph_bit) {
+                    // Dot covers multiple pixels, possibly skipping for scanlines:
+                    for (int dot_y=0; dot_y<dot_size; dot_y+=yskip) {
+                        for (int dot_x=0; dot_x<dot_size; dot_x+=xskip) {
+                            int px = gx*dot_size + dot_x;
+                            int py = gy*dot_size + dot_y;
+                            pixel_addr[pixel_offset(px, py, matrix)] = color;
+                        }
+                    }
+                }
+            }
+        }
 
-			screen[l-6*640]=(fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l-6*640];
-			screen[l-7*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l-7*640];
-
-			screen[l-8*640]=(fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l-8*640];
-			screen[l-9*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l-9*640];
-
-			screen[l-10*640]=(fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l-10*640];
-			screen[l-11*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l-11*640];
-
-			screen[l-12*640]=(fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l-12*640];
-			screen[l-13*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l-13*640];
-
-			screen[l-14*640]=(fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l-14*640];
-			screen[l-15*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l-15*640];
-		}
-		for (l=1;l<16;l=l+2) {
-			screen[l-0*640]=(fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l-0*640];
-			screen[l-1*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x80)?color:screen[l-1*640];
-
-			screen[l-2*640]=(fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l-2*640];
-			screen[l-3*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x40)?color:screen[l-3*640];
-
-			screen[l-4*640]=(fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l-4*640];
-			screen[l-5*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x20)?color:screen[l-5*640];
-
-			screen[l-6*640]=(fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l-6*640];
-			screen[l-7*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x10)?color:screen[l-7*640];
-
-			screen[l-8*640]=(fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l-8*640];
-			screen[l-9*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x08)?color:screen[l-9*640];
-
-			screen[l-10*640]=(fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l-10*640];
-			screen[l-11*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x04)?color:screen[l-11*640];
-
-			screen[l-12*640]=(fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l-12*640];
-			screen[l-13*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x02)?color:screen[l-13*640];
-
-			screen[l-14*640]=(fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l-14*640];
-			screen[l-15*640]=(sl && fontdata8x8[((text[i])*8)+l/2]&0x01)?color:screen[l-15*640];
-		}
-		screen-=16*640;
-	} 
+        pixel_addr += pixel_offset(glyph_size*dot_size, 0, matrix);
+        ++text;
+    }
 }
 
 static void gp2x_text(unsigned short *screen, int x, int y, char *text, int color)
 {
     if (options.rol) {
-        gp2x_text_rol(screen, x, y, text, color);
+        unsigned short* origin = screen + 640*(480-1);
+        const int matrix[] = {0, 1,
+                            -1, 0};
+        gp2x_text_rot(origin, x, y, text, color, matrix);
+    }
+    else if (options.ror) {
+        unsigned short* origin = screen + 640;
+        const int matrix[] = {0, -1,
+                            1, 0};
+        gp2x_text_rot(origin, x, y, text, color, matrix);
     }
     else {
-        gp2x_text_(screen, x, y, text, color);
+        const int matrix[] = {1, 0,
+                            0, 1};
+        gp2x_text_rot(screen, x, y, text, color, matrix);
     }
 }
 

@@ -64,7 +64,7 @@ static void load_bmp_16bpp(unsigned short *out, unsigned short *in)
 	//Load bitmap, file will be flipped y so invert
 	in+=(640*480)-1;
 	for (y=479;y!=-1;y--) {
-		if (scanlines && y%2) {
+		if (scanlines && y%2==0) {
 			memset(out, 0, 640*2);
 		}
 		else {
