@@ -62,16 +62,16 @@ static void load_bmp_16bpp(unsigned short *out, unsigned short *in)
 
 	int scanlines = options.display_effect == 1;
 	//Load bitmap, file will be flipped y so invert
-	in+=(640*480)-1;
-	for (y=479;y!=-1;y--) {
-		if (scanlines && y%2==0) {
+	in += 480*640;
+	for (y=0; y<480; ++y) {
+		in -= 640;
+		if (scanlines && y%2) {
 			memset(out, 0, 640*2);
 		}
 		else {
 			memcpy(out, in, 640*2);
 		}
-		out+=640;
-		in-=640;
+		out += 640;
 	}
 }
 
@@ -120,7 +120,7 @@ static void gp2x_intro_screen(int first_run) {
 	if (f) {
 		//Read header to find where to skip to for bitmap
         fread(&h, sizeof(BITMAPFILEHEADER), 1, f); //reading the FILEHEADER
-		fseek(f, h.bfOffBits+sizeof(h), SEEK_SET);
+		fseek(f, h.bfOffBits, SEEK_SET);
 
 		fread(gp2xmenu_bmp,1,1000000,f);
 		fclose(f);
