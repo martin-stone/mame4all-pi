@@ -127,7 +127,7 @@ int main (int argc, char **argv)
 {
 	int res, i, j = 0, game_index;
     char *playbackname = NULL;
-    char gamenameselection[32];
+    char gamenameselection[32] = "";
     int use_cyclone=1;
     int use_drz80_save=0;
    	int use_drz80_snd_save=1;
@@ -213,7 +213,7 @@ int main (int argc, char **argv)
         exit(1);
     };
 
-    game_index = prev_game_to_autorun();
+    if (!*gamenameselection) game_index = prev_game_to_autorun();
     int autorun_previous = game_index > -1;
     
 gui_loop:
