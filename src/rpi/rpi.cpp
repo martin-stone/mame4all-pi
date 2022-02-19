@@ -437,14 +437,12 @@ gui_loop:
         use_mouse=0;
     }
 
+    set_next_game_to_autorun(game_index);
+    autorun_previous = 0; // Use GUI from now on.
+
     /* go for it */
     printf ("%s (%s)...\n",drivers[game_index]->description,drivers[game_index]->name);
     res = run_game (game_index);
-
-    if (!res) {
-        set_next_game_to_autorun(game_index);
-        autorun_previous = 0; // Use GUI from now on.
-    }
 
 	/* close open files */
 	if (errorlog) fclose (errorlog);
