@@ -444,6 +444,8 @@ gui_loop:
     printf ("%s (%s)...\n",drivers[game_index]->description,drivers[game_index]->name);
     res = run_game (game_index);
 
+    if (res != 0) set_next_game_to_autorun(-1);
+
 	/* close open files */
 	if (errorlog) fclose (errorlog);
 	if (options.playback) osd_fclose (options.playback);
